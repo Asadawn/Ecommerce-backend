@@ -47,11 +47,15 @@ app.post("/add-product", async (req, res) => {
 });
 
 app.get("/products", async (req, res) => {
-  let products = await Product.find();
-  if (products.length > 0) {
-    res.send(products);
-  } else {
-    res.send(result, "No Products Found.");
+  try {
+    let products = await Product.find();
+    if (products.length > 0) {
+      res.send(products);
+    } else {
+      res.status(404).send({ message: "No Products Found." });
+    }
+  } catch (error) {
+    res.status(500).send({ message: "Error fetching products." });
   }
 });
 
@@ -66,6 +70,32 @@ app.delete("/product/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting product:", error);
     res.status(500).send({ message: "Internal server error" });
+  }
+});
+
+app.get("/product/:id", async (req, res) => {
+  try {
+    let result = await Product.findOne({ _id: req.params.id });
+    if (result) {
+      res.send(result);
+    } else {
+      res.send({ result: "No result found." });
+    }
+  } catch (error) {
+    console.error("Error finding product", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
+app.put("/product/:id", async (req, res) => {
+  try {
+    const result = await Product.updateOne(
+      { _id: req.params.id },
+      { $set: req.body }
+    );
+    res.send(result);
+  } catch (error) {
+    res.status(500).send("Error updating product");
   }
 });
 
