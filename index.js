@@ -99,4 +99,34 @@ app.put("/product/:id", async (req, res) => {
   }
 });
 
+// app.get("/search/:key", async (req, res) => {
+//   let result = await Product.findOne({
+//     $or: [
+//       {
+//         name: { $regex: req.params.key },
+//         company: { $regex: req.params.key },
+//         category: { $regex: req.params.key },
+//       },
+//     ],
+//   });
+// });
+app.get("/search/:key", async (req, res) => {
+  try {
+    const result = await Product.find({
+      $or: [
+        {
+          name: { $regex: req.params.key, $options: "i" }, // Case-insensitive search
+          company: { $regex: req.params.key, $options: "i" }, // Case-insensitive search
+          category: { $regex: req.params.key, $options: "i" }, // Case-insensitive search
+        },
+      ],
+    });
+
+    res.json(result); // Send the search results as JSON
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" }); // Handle errors appropriately
+  }
+});
+
 app.listen(5000, () => console.log("App is running on port 5000"));
